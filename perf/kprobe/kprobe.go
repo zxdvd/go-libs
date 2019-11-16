@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"github.com/zxdvd/go-libs/std-helper/fs"
 )
 
 const traceDir = "/sys/kernel/debug/tracing"
@@ -25,19 +26,12 @@ func absPath(path string) string {
 	return filepath.Join(traceDir, path)
 }
 
-func exists(path string) bool {
-	_, err := os.Stat(path)
-	if err == nil || os.IsExist(err) {
-		return true
-	}
-	return false
-}
 
 func isKprobeEnabled() bool {
 	if kprobeEnabled != nil {
 		return *kprobeEnabled
 	}
-	if exists(absPath("kprobe_events")) {
+	if fs.Exists(absPath("kprobe_events")) {
 		return true
 	}
 	return false
@@ -84,13 +78,13 @@ func NewKprobe(p string) (*Kprobe, error) {
 }
 
 func (p *Kprobe) Add() error {
-	return appendString(absPath("kprobe_events"), p.probe)
+	return fs.AppendFile(absPath("kprobe_events"), p.probe)
 }
 
 func (p *Kprobe) Remove() error {
 	_ = p.Disable()
 	removeCmd := "-:" + p.name + "\n"
-	err := appendString(absPath("kprobe_events"), removeCmd)
+	err := fs.AppendFile(absPath("kprobe_events"), removeCmd)
 	return err
 }
 
@@ -98,34 +92,14 @@ func (p *Kprobe) Name() string {
 	return p.name
 }
 
-func appendString(path string, line string) error {
-	f, err := os.OpenFile(path, os.O_RDWR | os.O_APPEND, os.ModeAppend)
-	if err != nil {
-		return err
-	}
-	_, err = f.WriteString(line)
-	f.Close()
-	return err
-}
-
-func overwriteString(path string, line string) error {
-	f, err := os.OpenFile(path, os.O_RDWR | os.O_TRUNC, os.ModePerm)
-	if err != nil {
-		return err
-	}
-	_, err = f.WriteString(line)
-	f.Close()
-	return err
-}
-
 func (p *Kprobe) Enable() error {
 	path := fmt.Sprintf("events/kprobes/%s/enable", p.name)
-	return overwriteString(absPath(path), "1")
+	return fs.TruncFileWithString(absPath(path), "1")
 }
 
 func (p *Kprobe) Disable() error {
 	path := fmt.Sprintf("events/kprobes/%s/enable", p.name)
-	return overwriteString(absPath(path), "0")
+	return fs.TruncFileWithString(absPath(path), "0")
 }
 
 func Events() ([][]byte, error) {
@@ -135,14 +109,14 @@ func Events() ([][]byte, error) {
 
 func RemoveAll() error {
 	// this file won't exists if no kprobes
-	if !exists(absPath("events/kprobes")) {
+	if !fs.Exists(absPath("events/kprobes")) {
 		return nil
 	}
 	// this will disable all kprobes
-	if err := overwriteString(absPath("events/kprobes/enable"), "0"); err != nil {
+	if err := fs.TruncFileWithString(absPath("events/kprobes/enable"), "0"); err != nil {
 		fmt.Printf("failed to disable all kprobes\n")
 	}
-	return overwriteString(absPath("kprobe_events"), "")
+	return fs.TruncFileWithString(absPath("kprobe_events"), "")
 }
 
 
