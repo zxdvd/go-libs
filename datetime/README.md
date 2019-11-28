@@ -14,8 +14,9 @@ r := Format(time.Now(), "YYYY-MM-DD HH:mm:ss.SSS")
 The benchmark result compared with standard library
 
 ```
-BenchmarkFormat-4        2000000              1037 ns/op             128 B/op          7 allocs/op
-BenchmarkStdFormat-4     3000000               479 ns/op              32 B/op          1 allocs/op
+$ go test -bench=. -benchmem
+BenchmarkFormat-4        3000000               546 ns/op              32 B/op          1 allocs/op
+BenchmarkStdFormat-4     3000000               465 ns/op              32 B/op          1 allocs/op
 ```
 
 ### TODO

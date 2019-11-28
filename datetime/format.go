@@ -1,7 +1,6 @@
 package datetime
 
 import (
-	"bytes"
 	"math"
 	"strconv"
 	"strings"
@@ -378,11 +377,29 @@ func prepad0(b []byte, width int) []byte {
 }
 
 func prepad(b []byte, width int, p byte) []byte {
-	if width <= len(b) {
+	l := len(b)
+	padlen := width - l
+	if padlen <= 0 {
 		return b
 	}
-	buf := bytes.Repeat([]byte{p}, width-len(b))
-	return append(buf, b...)
+	if width > cap(b) {
+		buf := make([]byte, 0, width)
+		for i := 0; i < width-l; i++ {
+			buf = append(buf, p)
+		}
+		return append(buf, b...)
+	}
+
+	// width <= cap(b) then we can safe expand b to width length
+	b = b[:width]
+	// move the origin to end then we can prepend char at begin
+	for i := 0; i < l; i++ {
+		b[width-1-i] = b[l-1-i]
+	}
+	for i := 0; i < padlen; i++ {
+		b[i] = p
+	}
+	return b
 }
 
 var ordNumMap = map[int]string{
