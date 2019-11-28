@@ -246,7 +246,7 @@ func Format(t time.Time, layout string) string {
 		case tokM:
 			b = appendInt(b, int(t.Month()), 0)
 		case tokMo:
-			b = append(b, ordStr(int(t.Month()))...)
+			b = appendOrdStr(b, int(t.Month()))
 		case tokMM:
 			b = appendInt(b, int(t.Month()), 2)
 		case tokMMM:
@@ -258,19 +258,19 @@ func Format(t time.Time, layout string) string {
 		case tokD:
 			b = appendInt(b, t.Day(), 0)
 		case tokDo:
-			b = append(b, ordStr(t.Day())...)
+			b = appendOrdStr(b, int(t.Day()))
 		case tokDD:
 			b = appendInt(b, t.Day(), 2)
 		case tokDDD:
 			b = appendInt(b, t.YearDay(), 0)
 		case tokDDDo:
-			b = append(b, ordStr(t.YearDay())...)
+			b = appendOrdStr(b, int(t.YearDay()))
 		case tokDDDD:
 			b = appendInt(b, t.YearDay(), 3)
 		case tokd:
 			b = appendInt(b, int(t.Weekday()), 0)
 		case tokdo:
-			b = append(b, ordStr(int(t.Weekday()))...)
+			b = appendOrdStr(b, int(t.Weekday()))
 		case tokdd:
 			s := shortDayNames[t.Weekday()]
 			b = append(b, []byte(s)[0:2]...)
@@ -365,17 +365,19 @@ func Format(t time.Time, layout string) string {
 }
 
 func appendInt(b []byte, x int, width int) []byte {
-	buf := []byte(strconv.Itoa(x))
-	buf = pad0(buf, width)
+	var buffer [20]byte
+	buf := buffer[:0]
+	buf = strconv.AppendInt(buf, int64(x), 10)
+	buf = prepad0(buf, width)
 	b = append(b, buf...)
 	return b
 }
 
-func pad0(b []byte, width int) []byte {
-	return pad(b, width, '0')
+func prepad0(b []byte, width int) []byte {
+	return prepad(b, width, '0')
 }
 
-func pad(b []byte, width int, p byte) []byte {
+func prepad(b []byte, width int, p byte) []byte {
 	if width <= len(b) {
 		return b
 	}
@@ -388,10 +390,9 @@ var ordNumMap = map[int]string{
 	2: "nd",
 }
 
-func ordStr(n int) []byte {
-	buf := []byte(strconv.Itoa(n))
-	buf = append(buf, ordNumSuffix(n)...)
-	return buf
+func appendOrdStr(b []byte, n int) []byte {
+	b = appendInt(b, n, 0)
+	return append(b, ordNumSuffix(n)...)
 }
 
 func ordNumSuffix(n int) string {
