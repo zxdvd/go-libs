@@ -221,11 +221,10 @@ func nextStdChunk(layout string) (prefix string, std tok, suffix string) {
 	return layout, tokNop, ""
 }
 
-var layoutBuffer [64]byte
-
 func Format(t time.Time, layout string) string {
 	buflen := len(layout) + 10
 	var b []byte
+	var layoutBuffer [64]byte
 	if buflen < 64 {
 		b = layoutBuffer[:0]
 	} else {
