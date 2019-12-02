@@ -2,7 +2,6 @@ package datetime
 
 import (
 	"errors"
-	"math"
 	"time"
 )
 
@@ -106,13 +105,13 @@ func Parse(tstr string, layout string) (time.Time, error) {
 			second, tstr, err = getnumExactly(tstr, 2)
 		case tokS:
 			nano, tstr, err = getnumExactly(tstr, 1)
-			nano = nano * int(math.Pow10(8))
+			nano = nano * 1e8
 		case tokSS:
 			nano, tstr, err = getnumExactly(tstr, 2)
-			nano = nano * int(math.Pow10(7))
+			nano = nano * 1e7
 		case tokSSS:
 			nano, tstr, err = getnumExactly(tstr, 3)
-			nano = nano * int(math.Pow10(6))
+			nano = nano * 1e6
 		case tokz, tokzz:
 			//TODO
 		case tokZ, tokZZ:

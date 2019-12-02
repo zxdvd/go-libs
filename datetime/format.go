@@ -1,7 +1,6 @@
 package datetime
 
 import (
-	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -332,13 +331,13 @@ func Format(t time.Time, layout string) string {
 			b = appendInt(b, t.Second(), 2)
 		case tokS:
 			nano := t.Nanosecond()
-			b = appendInt(b, nano/int(math.Pow10(8)), 1)
+			b = appendInt(b, nano/1e8, 1)
 		case tokSS:
 			nano := t.Nanosecond()
-			b = appendInt(b, nano/int(math.Pow10(7)), 2)
+			b = appendInt(b, nano/1e7, 2)
 		case tokSSS:
 			nano := t.Nanosecond()
-			b = appendInt(b, nano/int(math.Pow10(6)), 3)
+			b = appendInt(b, nano/1e6, 3)
 		case tokz, tokzz:
 			zone, _ := t.Zone()
 			b = append(b, zone...)
