@@ -1,9 +1,16 @@
 package dag
 
 import (
-	"log"
 	"testing"
 )
+
+type node struct {
+	children []Node
+}
+
+func (n *node) Nexts() []Node {
+	return n.children
+}
 
 func detectAndPanic(d *Dag) {
 	if err := d.CircleDetect(); err != nil {
@@ -12,27 +19,15 @@ func detectAndPanic(d *Dag) {
 }
 
 func TestDag(t *testing.T) {
-	var a, b, c, d, e Node
+	a := &node{}
+	b := &node{}
 	dag := &Dag{}
-	dag.Adds(&a, &b, &c, &d, &e)
+	dag.Add(a, b)
+	detectAndPanic(dag)
 	// add self to make a circle
-	a.AddParent(&a)
+	a.children = []Node{a}
 	err := dag.CircleDetect()
 	if err != ErrCircle {
 		panic("should have circle here")
 	}
-	a.removeLast()
-
-	a.AddParent(&b)
-	b.AddParent(&c)
-	a.AddParent(&c)
-	c.AddParent(&e)
-	detectAndPanic(dag)
-	e.AddParent(&a)
-	err = dag.CircleDetect()
-	if err != ErrCircle {
-		panic("should have circle here")
-	}
-	e.removeLast()
-	log.Printf("dag %v\n", dag)
 }

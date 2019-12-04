@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	"github.com/pkg/errors"
-	"github.com/zxdvd/go-libs/utils"
+	"github.com/zxdvd/go-libs/std-helper/str"
 )
 
 type fnNewTask func(args ...interface{}) (Task, error)
@@ -111,7 +111,7 @@ func (t *ShellTask) Run(ctx context.Context) error {
 	params := map[string]string{
 		"name": t.name,
 	}
-	cmd := utils.StrReplace(t.cmd, params)
+	cmd := str.StrReplace(t.cmd, params)
 	log.Println("------cmd", cmd)
 	command := exec.Command("sh", "-c", cmd)
 	command.Dir = t.cwd
